@@ -26,7 +26,12 @@ A concept / prototype website for **BRICS Bazaar 2026** — a craft exhibition b
 brics-bazaar/
 ├── index.html      → all page content, including all 60 stalls and the site plan SVG
 ├── style.css       → all styling, responsive rules, and the CSS-only interaction layer
+├── artisans/
+│   ├── 01.html     → artisan QR page — Stall 01, Bandhani (master template)
+│   └── artisan.css → shared by all 60 artisan pages
 ├── assets/
+│   ├── artisans/
+│   │   └── bandhani/   → hero, process-01…04, artisan, detail
 │   ├── images/
 │   ├── icons/
 │   └── fonts/
@@ -134,3 +139,108 @@ Works in all current browsers. Two enhancements degrade gracefully:
 - Scroll-driven animation adds the header shadow on scroll. Without it there is no shadow.
 
 Neither affects content, layout or navigation.
+
+
+---
+
+# Artisan QR Pages
+
+Each physical stall carries a QR code. Scanning it opens a dedicated mobile-first
+page introducing the craft and the maker — a story layer on top of the physical
+exhibition, not a replacement for it.
+
+`artisans/01.html` is the working prototype and the master template for all 60.
+
+## URLs
+
+| Stall | Page | QR code points to |
+|---|---|---|
+| 01 | `artisans/01.html` | `/artisans/01.html` |
+| 02 | `artisans/02.html` | `/artisans/02.html` |
+| … | … | … |
+| 60 | `artisans/60.html` | `/artisans/60.html` |
+
+The folder is `artisans/` (plural) so the paths match the QR URLs exactly — those
+are printed on physical signage and are the hardest thing to change later.
+
+## Making pages 02–60
+
+1. Copy `01.html` to `02.html`.
+2. Replace only the blocks marked `<!-- CONTENT SLOT · … -->`. There are eleven:
+   page title, hero image, craft name / category / location, stall number, craft
+   statement, craft description, craft facts, process 01–04, artisan image,
+   artisan name / role / location, artisan bio, quote, and detail image.
+3. Add that craft's images under `assets/artisans/<craft-slug>/` using the same
+   seven filenames, and update the `src` paths.
+4. Do not edit `artisan.css`. It contains nothing craft-specific and is shared by
+   all 60 pages, so one change there updates every artisan page at once.
+
+## Content budget
+
+Deliberately tight — the visitor is standing at the stall, not sitting down to read.
+
+| Block | Budget | Stall 01 |
+|---|---|---|
+| Craft description | 70–100 words | 78 |
+| Each process step | 20–35 words | 26 / 24 / 21 / 24 |
+| Artisan bio | 60–90 words | 81 |
+| Quote | one sentence | ✓ |
+| **Total body copy** | **≈250 words** | **254** |
+
+Roughly a 60-second read, or 15–20 seconds skimmed — which is what most visitors
+will actually do while standing beside the work.
+
+## Images
+
+All seven are procedurally generated **placeholders**, not photographs. Each
+carries a visible `PROTOTYPE IMAGE — REPLACE` stamp so none can reach production
+by accident, and each sits at the exact filename its final photograph will use:
+
+```
+assets/artisans/bandhani/
+├── hero.jpg         → artisan tying knots; documentary, close, hands visible
+├── process-01.jpg   → washed and folded cloth, design being marked
+├── process-02.jpg   → hands pinching and binding each point
+├── process-03.jpg   → tied cloth entering the dye vat
+├── process-04.jpg   → knots being opened, pattern emerging
+├── artisan.jpg      → environmental portrait at the work table
+└── detail.jpg       → macro of the finished cloth
+```
+
+Replace the files in place — no markup changes needed. `process-02.jpg` is reused
+as the desktop craft-detail image, which is why the page shows eight `<img>`
+elements from seven files.
+
+Shoot for hands, tools, material and process over posed portraits or product
+photography. The craft should be shown being made.
+
+Regenerate the placeholders with `python3 build/make_assets.py` (build-time only,
+requires Pillow).
+
+## Sample content
+
+The artisan name, role, biography and quote are **prototype content** and are
+labelled as such on the page itself ("Sample artisan profile", "Sample quote", and
+a footer note). No awards, years of experience or family history are claimed. The
+role line is deliberately neutral — `<!-- ROLE LINE -->` marks where a real
+descriptor goes once confirmed.
+
+Craft information is drawn from public documentation of Kutch Bandhani, including
+the Government of India handicrafts record and general reference sources.
+
+## Verified
+
+`build/verify_artisan.py` drives the page in a real browser with **JavaScript
+disabled** — 37 checks, all passing:
+
+- zero `<script>` tags, zero `.js` dependencies, zero inline handlers
+- no horizontal overflow at 320 / 360 / 390 / 430 / 768 / 1024 / 1280 / 1440 / 1920px
+- every image loads and carries an `alt` attribute; empty `alt` only on the one
+  decorative image
+- no body copy under 13.5px on mobile; every link at least 36px tall
+- content budgets above enforced automatically
+
+The page is about 6.3 phone screens tall. That is longer than a two-scroll page,
+but it is the honest cost of eight sections carrying six images — and the reading
+time, which is what actually determines whether a visitor finishes, stays under a
+minute.
